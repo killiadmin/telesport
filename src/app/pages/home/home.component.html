@@ -1,3 +1,14 @@
 <h2>Olympic games app</h2>
 <hr />
 <p>{{ (olympics$ | async)?.length }} data loaded</p>
+
+<div *ngIf="olympics$ | async as olympics">
+  <div style="display: block; width: 400px; height: 400px; margin: auto;">
+    <canvas
+      baseChart
+      [data]="pieChartData"
+      [options]="pieChartOptions"
+      [type]="pieChartType">
+    </canvas>
+  </div>
+</div>
