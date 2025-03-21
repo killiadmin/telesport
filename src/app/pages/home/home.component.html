@@ -1,9 +1,30 @@
 <h2>Olympic games app</h2>
 <hr />
-<p>{{ (olympics$ | async)?.length }} data loaded</p>
-
+<div class="d-flex justify-content-center text-center">
+  <h3 class="rounded p-2 text-white fw-light w-25" style="background-color: #04838f;">
+    Medals per country
+  </h3>
+</div>
+<div class="d-flex justify-content-center text-center gap-5 my-2">
+  <div class="rounded p-2 bg-white" style="border: 2px solid #04838f;">
+    <p class="mb-0 text-secondary">
+      Number of JOs
+    </p>
+    <span class="fw-bold">
+      {{ totalMedals }}
+    </span>
+  </div>
+  <div class="rounded p-2 bg-white" style="border: 2px solid #04838f;">
+    <p class="mb-0 text-secondary">
+      Number of country
+    </p>
+    <span class="fw-bold">
+      {{ (olympics$ | async)?.length }}
+    </span>
+  </div>
+</div>
 <div *ngIf="olympics$ | async as olympics">
-  <div style="display: block; width: 400px; height: 400px; margin: auto;">
+  <div class="m-auto" style="width: 400px; height: 400px;">
     <canvas
       baseChart
       [data]="pieChartData"
