@@ -28,6 +28,16 @@ export class HomeComponent implements OnInit {
       },
       tooltip: {
         enabled: true,
+        usePointStyle: true,
+        backgroundColor: "#04838f",
+        titleColor: "white",
+        bodyColor: "white",
+        boxPadding: 10,
+        callbacks: {
+          label: (context) => {
+            return [context.label, "🏅" + " " + context.raw];
+          },
+        },
       },
       datalabels: {
         display: true,
@@ -36,7 +46,7 @@ export class HomeComponent implements OnInit {
           size: 14,
           weight: "bold",
         },
-        formatter: (value: number, context: any) => {
+        formatter: (_value: number, context: any) => {
           return context.chart.data.labels[context.dataIndex];
         },
       },
@@ -57,6 +67,11 @@ export class HomeComponent implements OnInit {
 
   constructor(private olympicService: OlympicService) {}
 
+  /**
+   * Initializes the component by retrieving Olympic data and setting up the pie chart configuration.
+   *
+   * @return {void}
+   */
   ngOnInit(): void {
     this.olympics$ = this.olympicService.getOlympics();
 
@@ -72,6 +87,7 @@ export class HomeComponent implements OnInit {
               )
             );
 
+            //Calculation of the total medals
             this.totalMedals = olympics.reduce(
               (total: number, country: OlympicCountry) =>
                 total + country.participations.reduce((sum: number, p: any) =>
