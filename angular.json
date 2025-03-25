@@ -17,6 +17,9 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
+            "allowedCommonJsDependencies": [
+              "some-dependency"
+            ],
             "outputPath": {
               "base": "dist/olympic-games-starter"
             },
