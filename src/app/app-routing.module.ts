@@ -9,6 +9,10 @@ const routes: Routes = [
     path: '',
     component: HomeComponent,
   },
+  {
+    path: 'not-found',
+    component: NotFoundComponent,
+  },
   { path: ':country',
     component: CountryComponent,
   },
