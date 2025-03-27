@@ -1,7 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
+import { OlympicCountry } from "../models/Olympic";
 
 @Injectable({
   providedIn: 'root',
@@ -27,5 +29,24 @@ export class OlympicService {
 
   getOlympics() {
     return this.olympics$.asObservable();
+  }
+
+  /**
+   * Récupère un objet country par son nom à partir des données olympiques.
+   *
+   * @param {string} countryName
+   * @return {Observable<OlympicCountry | null>}
+   */
+  getCountryByName(countryName: string): Observable<OlympicCountry | null> {
+    return this.http.get<OlympicCountry[]>(this.olympicUrl).pipe(
+      map((datas) =>
+        datas.find((item: OlympicCountry) =>
+          item.country.toLowerCase() === countryName.toLowerCase()) || null,
+      ),
+      catchError((error, caught) => {
+        console.error(error);
+        return caught;
+      })
+    );
   }
 }

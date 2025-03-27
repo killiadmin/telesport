@@ -1,1 +1,9 @@
-<p>country works!</p>
+<div *ngIf="country$ | async as country;">
+  <h1>{{ country.country }}</h1>
+  <ul>
+    <li *ngFor="let participation of country.participations">
+      {{ participation.year }} - {{ participation.city }}
+      (Médailles : {{ participation.medalsCount }}, Sportifs : {{ participation.athleteCount }})
+    </li>
+  </ul>
+</div>
