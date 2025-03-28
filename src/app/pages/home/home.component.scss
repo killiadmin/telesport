@@ -1,14 +1,28 @@
 .w-canvas {
-  width: 500px;
-  height: 500px;
+  width: 100%;
+  max-width: 500px;
+  height: 300px;
+  margin: 0 auto;
 }
 
 canvas:hover {
   cursor: pointer !important;
 }
 
+.container-banner {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  margin: 0 auto;
+  width: fit-content;
+}
+
 .custom-banner {
   object-fit: cover;
   object-position: center;
   height: 150px;
+
+  @media (max-width: 768px) {
+    height: 65px;
+  }
 }
