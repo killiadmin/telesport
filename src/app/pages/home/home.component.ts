@@ -19,13 +19,14 @@ Chart.register(ChartDataLabels);
 export class HomeComponent implements OnInit {
   public olympics$: Observable<OlympicCountry[]> | null = null;
   public totalMedals: number = 0;
+  private readonly image: HTMLImageElement;
 
   public pieChartOptions: ChartOptions = {
     responsive: true,
     plugins: {
       legend: {
         display: true,
-        position: 'bottom',
+        position: 'center',
       },
       tooltip: {
         enabled: true,
@@ -35,8 +36,21 @@ export class HomeComponent implements OnInit {
         bodyColor: 'white',
         boxPadding: 10,
         callbacks: {
+          labelPointStyle: () => {
+            if (!this.image.complete) {
+              return {
+                pointStyle: 'circle',
+                rotation: 0,
+              };
+            }
+
+            return {
+              pointStyle: this.image,
+              rotation: 0,
+            };
+          },
           label: (context) => {
-            return [context.label, '🏅' + ' ' + context.raw];
+            return [`${context.label}`, `${context.raw}`];
           },
         },
       },
@@ -82,7 +96,10 @@ export class HomeComponent implements OnInit {
     ],
   };
 
-  constructor(private olympicService: OlympicService, private router: Router) {}
+  constructor(private olympicService: OlympicService, private router: Router) {
+    this.image = new Image(20, 20);
+    this.image.src = './assets/img/medal.png';
+  }
 
   /**
    * Initializes the component by retrieving Olympic data and setting up the pie chart configuration.
@@ -104,7 +121,7 @@ export class HomeComponent implements OnInit {
               )
             );
 
-            //Calculation of the total medals
+            // Calculation of the total medals
             this.totalMedals = olympics.reduce(
               (total: number, country: OlympicCountry) =>
                 total + country.participations.reduce((sum: number, p: any) =>
