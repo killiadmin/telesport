@@ -5,6 +5,7 @@ import { OlympicService } from "src/app/core/services/olympic.service";
 import { Chart, ChartData, ChartOptions, ChartType } from "chart.js";
 import { OlympicCountry } from "src/app/core/models/Olympic";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import { Router } from "@angular/router";
 
 Chart.register(ChartDataLabels);
 
@@ -51,6 +52,14 @@ export class HomeComponent implements OnInit {
         },
       },
     },
+    onClick: (event, elements, chart) => {
+      if (elements.length > 0) {
+        const elementIndex = elements[0].index;
+        const country = (chart.data.labels![elementIndex] as string).replace(/\s+/g, "").toLowerCase();
+
+        this.router.navigate(['/' + country]);
+      }
+    }
   };
 
   public pieChartType: ChartType = "pie";
@@ -65,7 +74,7 @@ export class HomeComponent implements OnInit {
     ],
   };
 
-  constructor(private olympicService: OlympicService) {}
+  constructor(private olympicService: OlympicService, private router: Router) {}
 
   /**
    * Initializes the component by retrieving Olympic data and setting up the pie chart configuration.

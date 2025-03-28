@@ -48,7 +48,7 @@ export class OlympicService {
             item.country.replace(/\s+/g, "").toLowerCase() === formattedName
         );
 
-        if (!findCountry) {
+        if (!findCountry || countryName.includes(" ")) {
           this.router.navigate(["/not-found"]);
           throw new Error("Country " + countryName + " not found!");
         }
