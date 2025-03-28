@@ -14,3 +14,9 @@
 canvas:hover {
   cursor: pointer !important;
 }
+
+.custom-banner {
+  object-fit: cover;
+  object-position: center;
+  height: 150px;
+}
