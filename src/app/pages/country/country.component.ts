@@ -15,6 +15,10 @@ import { ChartData, ChartOptions, ChartType } from 'chart.js';
 export class CountryComponent implements OnInit {
   public country$: Observable<OlympicCountry | null> | null = null;
 
+  public totalMedals: number = 0;
+  public totalAthletes: number = 0;
+  public totalEntries: number = 0;
+
   public lineChartData: ChartData<'line'> = {
     labels: [],
     datasets: [
@@ -65,6 +69,7 @@ export class CountryComponent implements OnInit {
       },
     },
   };
+
   public lineChartType: ChartType = 'line';
 
   constructor(
@@ -87,10 +92,20 @@ export class CountryComponent implements OnInit {
 
           this.lineChartData.labels = years;
           this.lineChartData.datasets[0].data = medals;
+
+          this.totalMedals = country.participations.reduce(
+            (total, p) => total + p.medalsCount, 0
+          );
+
+          this.totalAthletes = country.participations.reduce(
+            (total, p) => total + p.athleteCount, 0
+          );
+
+          this.totalEntries = country.participations.length;
         }
       });
     }
-  };
+  }
 
   /**
    * Navigates the application to the home page.
@@ -99,5 +114,5 @@ export class CountryComponent implements OnInit {
    */
   goToHome(): void {
     this.router.navigate(['/']);
-  };
+  }
 }
