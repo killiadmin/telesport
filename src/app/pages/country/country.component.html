@@ -1,5 +1,41 @@
-<h2>Olympic games app</h2>
+<h2 class="ms-2">Olympic games app</h2>
 <hr />
+
+<div class="d-flex justify-content-between align-items-center">
+  <button class="btn btn-secondary ms-2" (click)="goToHome()">
+    retour
+  </button>
+  <h3 class="rounded p-2 text-white fw-light w-25 bg-main text-center m-0">
+    Espagne
+  </h3>
+  <div>&nbsp;</div>
+</div>
+<div class="d-flex justify-content-center text-center gap-5 my-2">
+  <div class="rounded p-2 bg-white border-main">
+    <p class="mb-0 text-secondary">
+      Number of entries
+    </p>
+    <span class="fw-bold">
+      999
+    </span>
+  </div>
+  <div class="rounded p-2 bg-white border-main">
+    <p class="mb-0 text-secondary">
+      Total number medals
+    </p>
+    <span class="fw-bold">
+      999
+    </span>
+  </div>
+  <div class="rounded p-2 bg-white border-main">
+    <p class="mb-0 text-secondary">
+      Number number of athletes
+    </p>
+    <span class="fw-bold">
+      999
+    </span>
+  </div>
+</div>
 
 <div *ngIf="country$ | async">
   <div class="m-auto w-canvas">

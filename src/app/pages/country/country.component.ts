@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { OlympicService } from '../../core/services/olympic.service';
 import { Observable } from 'rxjs';
 import { OlympicCountry } from '../../core/models/Olympic';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ChartData, ChartOptions, ChartType } from 'chart.js';
 
 @Component({
@@ -70,6 +70,7 @@ export class CountryComponent implements OnInit {
   constructor(
     private olympicService: OlympicService,
     private route: ActivatedRoute,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -89,5 +90,14 @@ export class CountryComponent implements OnInit {
         }
       });
     }
-  }
+  };
+
+  /**
+   * Navigates the application to the home page.
+   *
+   * @return {void}
+   */
+  goToHome(): void {
+    this.router.navigate(['/']);
+  };
 }
