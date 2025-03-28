@@ -9,12 +9,12 @@ const routes: Routes = [
     path: '',
     component: HomeComponent,
   },
+  { path: 'details/:id',
+    component: CountryComponent,
+  },
   {
     path: 'not-found',
     component: NotFoundComponent,
-  },
-  { path: ':country',
-    component: CountryComponent,
   },
   {
     path: '**', // wildcard

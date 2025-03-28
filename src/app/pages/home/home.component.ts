@@ -55,9 +55,17 @@ export class HomeComponent implements OnInit {
     onClick: (event, elements, chart) => {
       if (elements.length > 0) {
         const elementIndex = elements[0].index;
-        const country = (chart.data.labels![elementIndex] as string).replace(/\s+/g, '').toLowerCase();
+        this.olympics$?.subscribe((olympics) => {
+          if (olympics && olympics[elementIndex]) {
+            const countryId = olympics[elementIndex].id;
 
-        this.router.navigate(['/' + country]);
+            if (!countryId) {
+              return;
+            }
+
+            this.router.navigate(['/details', countryId]);
+          }
+        });
       }
     }
   };

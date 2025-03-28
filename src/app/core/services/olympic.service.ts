@@ -33,24 +33,21 @@ export class OlympicService {
   }
 
   /**
-   * Récupère un objet country par son nom à partir des données olympiques.
+   * Recovers a country object by its identifier from the Olympic data.
    *
-   * @param {string} countryName
+   * @param {number} countryId
    * @return {Observable<OlympicCountry>}
    */
-  getCountryByName(countryName: string): Observable<OlympicCountry> {
-    const formattedName = countryName.replace(/\s+/g, "").toLowerCase();
-
+  getCountryById(countryId: number): Observable<OlympicCountry> {
     return this.http.get<OlympicCountry[]>(this.olympicUrl).pipe(
       map((datas) => {
         const findCountry = datas.find(
-          (item: OlympicCountry) =>
-            item.country.replace(/\s+/g, "").toLowerCase() === formattedName
+          (item: OlympicCountry) => item.id === countryId
         );
 
-        if (!findCountry || countryName.includes(" ")) {
-          this.router.navigate(["/not-found"]);
-          throw new Error("Country " + countryName + " not found!");
+        if (!findCountry) {
+          this.router.navigate(['/not-found']);
+          throw new Error('Country with ID ' + countryId + ' not found!');
         }
 
         return findCountry;

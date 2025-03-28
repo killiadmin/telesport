@@ -20,10 +20,11 @@ export class CountryComponent implements OnInit {
   ) {};
 
   ngOnInit(): void {
-    const countryName = this.route.snapshot.paramMap.get('country');
+    const countryId = this.route.snapshot.paramMap.get('id');
 
-    if (countryName) {
-      this.country$ = this.olympicService.getCountryByName(countryName);
+    if (countryId) {
+      const parseId = parseInt(countryId, 10);
+      this.country$ = this.olympicService.getCountryById(parseId);
     }
   }
 }
