@@ -7,3 +7,11 @@
 .border-main {
   border: 2px solid #04838f;
 }
+
+.snackbar-error {
+  background-color: #ff6a6a !important;
+  color: white !important;
+  font-weight: bold;
+  border-radius: 8px;
+  padding: 16px;
+}

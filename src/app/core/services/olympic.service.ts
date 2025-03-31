@@ -1,10 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { OlympicCountry } from "../models/Olympic";
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
   providedIn: 'root',
@@ -13,17 +14,30 @@ export class OlympicService {
   private olympicUrl = './assets/mock/olympic.json';
   private olympics$ = new BehaviorSubject<OlympicCountry[]>([]);
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private snackbar: MatSnackBar) {}
 
+  /**
+   * Loads the initial Olympic data from the specified endpoint.
+   * The retrieved data is emitted to an internal observable and managed accordingly.
+   * In case of an error during the data retrieval process, an error message is logged,
+   * displayed to the user via a snackbar, and an empty array is emitted.
+   *
+   * @return {Observable<OlympicCountry[]>}
+   */
   loadInitialData(): Observable<OlympicCountry[]>{
     return this.http.get<OlympicCountry[]>(this.olympicUrl).pipe(
       tap((value) => this.olympics$.next(value)),
-      catchError((error, caught) => {
-        // TODO: improve error handling
-        console.error(error);
-        // can be useful to end loading state and let the user know something went wrong
+      catchError((error) => {
+        console.error("Les données n'ont pu être chargées correctement :", error);
         this.olympics$.next([]);
-        return caught;
+        this.snackbar.open('Une erreur est survenue, veuillez réessayer ultérieurement.', 'Fermer', {
+          duration: 5000,
+          panelClass: 'snackbar-error',
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+        });
+
+        return of([]);
       })
     );
   }
@@ -41,20 +55,27 @@ export class OlympicService {
   getCountryById(countryId: number): Observable<OlympicCountry> {
     return this.http.get<OlympicCountry[]>(this.olympicUrl).pipe(
       map((datas) => {
-        const findCountry = datas.find(
-          (item: OlympicCountry) => item.id === countryId
-        );
+        const findCountry = datas.find((item) => item.id === countryId);
 
         if (!findCountry) {
-          this.router.navigate(['/not-found']);
-          throw new Error('Country with ID ' + countryId + ' not found!');
+          throw new Error("Le pays demander est introuvable.");
         }
 
         return findCountry;
       }),
-      catchError((error, caught) => {
-        console.error(error);
-        return caught;
+      catchError((error) => {
+        console.error("Erreur lors de la récupération du pays :", error);
+
+        this.snackbar.open("La fiche du pays n'est pas disponible, veuillez réessayer ultérieurement.", "Fermer", {
+          duration: 5000,
+          panelClass: 'snackbar-error',
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+        });
+
+        this.router.navigate(['/not-found']);
+
+        return of(null as any);
       })
     );
   }
