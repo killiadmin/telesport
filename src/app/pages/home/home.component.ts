@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, ReplaySubject } from 'rxjs';
+import { map, filter, shareReplay } from 'rxjs/operators';
 import { OlympicService } from 'src/app/core/services/olympic.service';
 import { Chart, ChartData, ChartOptions, ChartType } from 'chart.js';
 import { OlympicCountry } from 'src/app/core/models/Olympic';
@@ -17,9 +17,8 @@ Chart.register(ChartDataLabels);
 })
 
 export class HomeComponent implements OnInit {
-  public olympics$: Observable<OlympicCountry[]> | null = null;
-  public totalMedals: number = 0;
-  private readonly image: HTMLImageElement;
+  public olympicsData$: Observable<{ olympics: OlympicCountry[], totalMedals: number }> | null = null;
+  private readonly image: HTMLImageElement = new Image(20, 20);
 
   public pieChartOptions: ChartOptions = {
     responsive: true,
@@ -37,15 +36,8 @@ export class HomeComponent implements OnInit {
         boxPadding: 10,
         callbacks: {
           labelPointStyle: () => {
-            if (!this.image.complete) {
-              return {
-                pointStyle: 'circle',
-                rotation: 0,
-              };
-            }
-
             return {
-              pointStyle: this.image,
+              pointStyle: this.image.complete ? this.image : 'circle',
               rotation: 0,
             };
           },
@@ -66,97 +58,64 @@ export class HomeComponent implements OnInit {
         },
       },
     },
-    onClick: (event, elements, chart) => {
-      if (elements.length > 0) {
-        const elementIndex = elements[0].index;
-        this.olympics$?.subscribe((olympics) => {
-          if (olympics && olympics[elementIndex]) {
-            const countryId = olympics[elementIndex].id;
-
-            if (!countryId) {
-              return;
-            }
-
-            this.router.navigate(['/details', countryId]);
-          }
-        });
-      }
-    }
+    onClick: (event, activeElements) => this.handleChartClick(activeElements),
   };
 
   public pieChartType: ChartType = 'pie';
 
-  public pieChartData: ChartData<'pie', number[], string | string[]> = {
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        backgroundColor: [],
-      },
-    ],
-  };
+  public pieChartData$: ReplaySubject<ChartData<'pie', number[], string | string[]>> = new ReplaySubject(1);
 
   constructor(private olympicService: OlympicService, private router: Router) {
-    this.image = new Image(20, 20);
     this.image.src = './assets/img/medal.png';
   }
 
-  /**
-   * Initializes the component by retrieving Olympic data and setting up the pie chart configuration.
-   *
-   * @return {void}
-   */
   ngOnInit(): void {
-    this.olympics$ = this.olympicService.getOlympics();
+    this.olympicsData$ = this.olympicService.getOlympics().pipe(
+      filter((data) => data.length > 0),
+      map((olympics) => {
+        console.log(olympics);
 
-    this.olympics$
-      .pipe(
-        map((olympics: OlympicCountry[]) => {
-          if (olympics?.length > 0) {
-            this.pieChartData.labels = olympics.map((o) => o.country);
-            this.pieChartData.datasets[0].data = olympics.map((o) =>
-              o.participations.reduce(
-                (total: number, p: any) => total + p.medalsCount,
-                0
-              )
-            );
+        const labels = olympics.map((o) => o.country);
+        const data = olympics.map((o) =>
+          o.participations.reduce((total, p) => total + p.medalsCount, 0)
+        );
+        const totalMedals = data.reduce((sum, medalCount) => sum + medalCount, 0);
 
-            // Calculation of the total medals
-            this.totalMedals = olympics.reduce(
-              (total: number, country: OlympicCountry) =>
-                total + country.participations.reduce((sum: number, p: any) =>
-                  sum + p.medalsCount, 0), 0
-            );
+        this.pieChartData$.next({
+          labels: labels,
+          datasets: [
+            {
+              data: data,
+              backgroundColor: ['#9e5c63', '#b3cbea', '#82a2e0', '#823952', '#9b7fa3'],
+              hoverBackgroundColor: ['#b97a80', '#c6d6ef', '#9bb3ea', '#9e5e70', '#af97b4'],
+              hoverBorderColor: ['#b97a80', '#c6d6ef', '#9bb3ea', '#9e5e70', '#af97b4'],
+            },
+          ],
+        });
 
-            // Background-color
-            this.pieChartData.datasets[0].backgroundColor = [
-              '#9e5c63',
-              '#b3cbea',
-              '#82a2e0',
-              '#823952',
-              '#9b7fa3',
-            ];
+        return { olympics, totalMedals };
+      }),
+      shareReplay(1),
+    );
+  }
 
-            // Hover:Background-color
-            this.pieChartData.datasets[0].hoverBackgroundColor = [
-              '#b97a80',
-              '#c6d6ef',
-              '#9bb3ea',
-              '#9e5e70',
-              '#af97b4',
-            ];
-
-            // Hover:Border-color
-            this.pieChartData.datasets[0].hoverBorderColor = [
-              '#b97a80',
-              '#c6d6ef',
-              '#9bb3ea',
-              '#9e5e70',
-              '#af97b4',
-            ];
+  /**
+   * Click management on a graph section.
+   *
+   * @param activeElements
+   */
+  private handleChartClick(activeElements: any[]): void {
+    if (activeElements.length > 0) {
+      const elementIndex = activeElements[0].index;
+      this.olympicsData$?.pipe(
+        map((data) => {
+          const clickedCountry = data.olympics[elementIndex];
+          if (clickedCountry) {
+            const countryId = clickedCountry.id;
+            this.router.navigate(['/details', countryId]);
           }
         })
-      )
-      .subscribe();
+      ).subscribe();
+    }
   }
 }

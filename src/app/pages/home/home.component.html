@@ -2,38 +2,33 @@
 <hr />
 
 <div class="d-flex justify-content-center my-4 w-50 mx-auto border-main">
-  <img src="assets/img/banner.png" alt="Banner" class="img-fluid custom-banner w-100"/>
+  <img src="assets/img/banner.png" alt="Banner" class="img-fluid custom-banner w-100" />
 </div>
+
 <div class="container-banner">
   <h3 class="rounded p-2 text-white fw-light bg-main text-nowrap w-100">
     Medals per country
   </h3>
 </div>
-<div class="d-flex justify-content-center text-center gap-5 my-2">
-  <div class="rounded p-2 bg-white border-main">
-    <p class="mb-0 text-secondary">
-      Number of JOs
-    </p>
-    <span class="fw-bold">
-      {{ totalMedals }}
-    </span>
-  </div>
-  <div class="rounded p-2 bg-white border-main">
-    <p class="mb-0 text-secondary">
-      Number of country
-    </p>
-    <span class="fw-bold">
-      {{ (olympics$ | async)?.length }}
-    </span>
+
+<div *ngIf="olympicsData$ | async as data">
+  <div class="d-flex justify-content-center text-center gap-5 my-2">
+    <div class="rounded p-2 bg-white border-main">
+      <p class="mb-0 text-secondary">Number of JOs</p>
+      <span class="fw-bold">{{ data.totalMedals }}</span>
+    </div>
+    <div class="rounded p-2 bg-white border-main">
+      <p class="mb-0 text-secondary">Number of countries</p>
+      <span class="fw-bold">{{ data.olympics.length }}</span>
+    </div>
   </div>
 </div>
-<div *ngIf="olympics$ | async">
-  <div class="m-auto w-canvas pointer">
-    <canvas
-      baseChart
-      [data]="pieChartData"
-      [options]="pieChartOptions"
-      [type]="pieChartType">
-    </canvas>
-  </div>
+
+<div class="m-auto w-canvas pointer" *ngIf="pieChartData$ | async as chartData">
+  <canvas
+    baseChart
+    [data]="chartData"
+    [options]="pieChartOptions"
+    [type]="pieChartType">
+  </canvas>
 </div>
