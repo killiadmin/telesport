@@ -1,12 +1,14 @@
-import { Component, OnInit } from '@angular/core';
-import { Observable, ReplaySubject } from 'rxjs';
-import { map, filter, shareReplay } from 'rxjs/operators';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import {Observable, Subject} from 'rxjs';
+import { takeUntil, filter, map, shareReplay } from 'rxjs/operators';
 import { OlympicService } from 'src/app/core/services/olympic.service';
-import { Chart, ChartData, ChartOptions, ChartType } from 'chart.js';
-import { OlympicCountry } from 'src/app/core/models/Olympic';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { Chart } from 'chart.js';
 import { Router } from '@angular/router';
+import { ChartData, ChartOptions, ChartType } from 'chart.js';
+import { ReplaySubject } from 'rxjs';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { ActiveElement } from 'chart.js';
+import { OlympicCountry } from 'src/app/core/models/Olympic';
 import { Context } from 'chartjs-plugin-datalabels';
 
 Chart.register(ChartDataLabels);
@@ -18,14 +20,11 @@ Chart.register(ChartDataLabels);
   standalone: false,
 })
 
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   public olympicsData$: Observable<{ olympics: OlympicCountry[], totalMedals: number }> | null = null;
   private readonly image: HTMLImageElement = new Image(20, 20);
+  private readonly destroy$ = new Subject<void>();
 
-  /**
-   * Configuration options for a pie chart.
-   * This variable defines the settings for rendering a responsive pie chart with various plugins and interactions.
-   */
   public pieChartOptions: ChartOptions = {
     responsive: true,
     plugins: {
@@ -41,15 +40,11 @@ export class HomeComponent implements OnInit {
         bodyColor: 'white',
         boxPadding: 10,
         callbacks: {
-          labelPointStyle: () => {
-            return {
-              pointStyle: this.image.complete ? this.image : 'circle',
-              rotation: 0,
-            };
-          },
-          label: (context) => {
-            return [`${context.label}`, `${context.raw}`];
-          },
+          labelPointStyle: () => ({
+            pointStyle: this.image.complete ? this.image : 'circle',
+            rotation: 0,
+          }),
+          label: (context) => [`${context.label}`, `${context.raw}`],
         },
       },
       datalabels: {
@@ -107,6 +102,7 @@ export class HomeComponent implements OnInit {
         return {olympics, totalMedals};
       }),
       shareReplay(1),
+      takeUntil(this.destroy$),
     );
   }
 
@@ -126,9 +122,21 @@ export class HomeComponent implements OnInit {
               const countryId = clickedCountry.id;
               this.router.navigate(['/details', countryId]);
             }
-          })
+          }),
+          // Ajout de l'opérateur takeUntil pour le désabonnement
+          takeUntil(this.destroy$)
         ).subscribe();
       }
     }
+  }
+
+  /**
+   * Lifecycle hook that is called when a directive, component, or service is destroyed.
+   *
+   * @return {void}
+   */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { OlympicService } from '../../core/services/olympic.service';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { OlympicCountry } from '../../core/models/Olympic';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChartData, ChartOptions, ChartType } from 'chart.js';
@@ -12,7 +13,7 @@ import { ChartData, ChartOptions, ChartType } from 'chart.js';
   standalone: false,
 })
 
-export class CountryComponent implements OnInit {
+export class CountryComponent implements OnInit, OnDestroy {
   public country$: Observable<OlympicCountry | null> | null = null;
 
   public totalMedals: number = 0;
@@ -71,6 +72,7 @@ export class CountryComponent implements OnInit {
   };
 
   public lineChartType: ChartType = 'line';
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private olympicService: OlympicService,
@@ -85,25 +87,27 @@ export class CountryComponent implements OnInit {
       const parsedId = parseInt(countryId, 10);
       this.country$ = this.olympicService.getCountryById(parsedId);
 
-      this.country$.subscribe((country) => {
-        if (country) {
-          const years = country.participations.map((p) => p.year);
-          const medals = country.participations.map((p) => p.medalsCount);
+      this.country$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((country) => {
+          if (country) {
+            const years = country.participations.map((p) => p.year);
+            const medals = country.participations.map((p) => p.medalsCount);
 
-          this.lineChartData.labels = years;
-          this.lineChartData.datasets[0].data = medals;
+            this.lineChartData.labels = years;
+            this.lineChartData.datasets[0].data = medals;
 
-          this.totalMedals = country.participations.reduce(
-            (total, p) => total + p.medalsCount, 0
-          );
+            this.totalMedals = country.participations.reduce(
+              (total, p) => total + p.medalsCount, 0
+            );
 
-          this.totalAthletes = country.participations.reduce(
-            (total, p) => total + p.athleteCount, 0
-          );
+            this.totalAthletes = country.participations.reduce(
+              (total, p) => total + p.athleteCount, 0
+            );
 
-          this.totalEntries = country.participations.length;
-        }
-      });
+            this.totalEntries = country.participations.length;
+          }
+        });
     }
   }
 
@@ -114,5 +118,15 @@ export class CountryComponent implements OnInit {
    */
   goToHome(): void {
     this.router.navigate(['/']);
+  }
+
+  /**
+   * Method that is called when the component or directive is destroyed.
+   *
+   * @return {void}
+   */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

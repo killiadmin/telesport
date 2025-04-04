@@ -37,6 +37,8 @@ export class OlympicService {
           verticalPosition: 'top',
         });
 
+        this.router.navigate(['/not-found']);
+
         return of([]);
       })
     );
@@ -52,13 +54,13 @@ export class OlympicService {
    * @param {number} countryId
    * @return {Observable<OlympicCountry>}
    */
-  getCountryById(countryId: number): Observable<OlympicCountry> {
+  getCountryById(countryId: number): Observable<OlympicCountry | null> {
     return this.http.get<OlympicCountry[]>(this.olympicUrl).pipe(
       map((datas) => {
         const findCountry = datas.find((item) => item.id === countryId);
 
         if (!findCountry) {
-          throw new Error("Le pays demander est introuvable.");
+          throw new Error("Le pays demandé est introuvable.");
         }
 
         return findCountry;
@@ -75,7 +77,7 @@ export class OlympicService {
 
         this.router.navigate(['/not-found']);
 
-        return of(null as any);
+        return of(null);
       })
     );
   }
