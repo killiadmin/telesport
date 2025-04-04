@@ -21,7 +21,7 @@ Chart.register(ChartDataLabels);
 })
 
 export class HomeComponent implements OnInit, OnDestroy {
-  public olympicsData$: Observable<{ olympics: OlympicCountry[], totalMedals: number }> | null = null;
+  public olympicsData$: Observable<{ olympics: OlympicCountry[], totalJos: number }> | null = null;
   private readonly image: HTMLImageElement = new Image(20, 20);
   private readonly destroy$ = new Subject<void>();
 
@@ -85,7 +85,12 @@ export class HomeComponent implements OnInit, OnDestroy {
         const data = olympics.map((o) =>
           o.participations.reduce((total, p) => total + p.medalsCount, 0)
         );
-        const totalMedals = data.reduce((sum, medalCount) => sum + medalCount, 0);
+
+        const allParticipationIds = olympics.flatMap(
+          (o) => o.participations.map((p) => p.id)
+        );
+
+        const uniqueGamesCount = new Set(allParticipationIds).size;
 
         this.pieChartData$.next({
           labels: labels,
@@ -99,7 +104,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           ],
         });
 
-        return {olympics, totalMedals};
+        return { olympics, totalJos: uniqueGamesCount };
       }),
       shareReplay(1),
       takeUntil(this.destroy$),
